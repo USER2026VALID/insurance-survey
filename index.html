@@ -60,54 +60,63 @@
             box-sizing: border-box; background: #fff;
         }
 
-        /* 排序題專用樣式 */
-        .rank-container {
+        /* 選項卡片樣式 (填空風格) */
+        .option-pool {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
         }
-
-        .rank-slot {
-            background: #f0f2f5;
-            border: 2px dashed #cbd5e0;
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
-            color: #888;
-            font-weight: bold;
-            position: relative;
-            min-height: 24px;
-            transition: all 0.2s;
-        }
-        
-        .rank-slot.filled {
-            background: #e3f9e5;
-            border: 2px solid var(--selected);
-            color: var(--selected);
-            cursor: pointer;
-        }
-
-        .rank-label {
-            position: absolute;
-            left: 10px; top: 50%; transform: translateY(-50%);
-            font-size: 0.8em; color: #aaa; font-weight: normal;
-        }
-
-        .option-pool { display: grid; gap: 10px; }
 
         .option-card {
-            background: white; border: 1px solid #ddd; padding: 15px;
-            border-radius: 8px; cursor: pointer; text-align: left;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.2s;
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
         }
 
-        .option-card:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(0,0,0,0.1); }
-        .option-card.hidden { display: none; } 
+        .option-card:hover {
+            border-color: #bbb;
+            background-color: #f9f9f9;
+        }
 
-        .badge {
-            display: inline-block; background: #eee; font-size: 0.75em;
-            padding: 2px 6px; border-radius: 4px; margin-right: 5px; color: #666;
+        /* 選中狀態 */
+        .option-card.selected {
+            border-color: var(--selected);
+            background-color: #f0fff4;
+        }
+
+        /* 左側方框 (模擬填空) */
+        .rank-box {
+            width: 32px;
+            height: 32px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            margin-right: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: white;
+            background: white;
+            transition: all 0.2s;
+            flex-shrink: 0; /* 防止被擠壓 */
+        }
+
+        /* 數字顯示 */
+        .option-card.selected .rank-box {
+            background-color: var(--selected);
+            border-color: var(--selected);
+        }
+
+        .option-text {
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.4;
         }
 
         .step { display: none; animation: fadeIn 0.4s; }
@@ -121,7 +130,7 @@
         .nav-btn {
             background-color: var(--primary); color: white; border: none;
             padding: 12px 30px; border-radius: 6px; font-size: 16px;
-            cursor: pointer; width: 100%; margin-top: 10px;
+            cursor: pointer; width: 100%; margin-top: 20px;
             opacity: 0.5; pointer-events: none; transition: all 0.3s;
         }
         .nav-btn.ready { opacity: 1; pointer-events: auto; background-color: var(--accent); }
@@ -164,27 +173,24 @@
 
         <label style="color: var(--accent); font-size: 1.1em;">規劃對象</label>
         <div class="option-pool">
-            <button class="option-card" style="text-align:center; font-weight:bold;" onclick="selectTarget('self')">A. 只有我自己</button>
-            <button class="option-card" style="text-align:center; font-weight:bold;" onclick="selectTarget('family')">B. 只有家人</button>
-            <button class="option-card" style="text-align:center; font-weight:bold;" onclick="selectTarget('both')">C. 兩者都要</button>
+            <button class="option-card" style="justify-content:center; font-weight:bold;" onclick="selectTarget('self')">A. 只有我自己</button>
+            <button class="option-card" style="justify-content:center; font-weight:bold;" onclick="selectTarget('family')">B. 只有家人</button>
+            <button class="option-card" style="justify-content:center; font-weight:bold;" onclick="selectTarget('both')">C. 兩者都要</button>
         </div>
     </div>
 
     <div id="step-question" class="step">
         <h4 id="q-category" style="text-align:center; color:#999; margin:0;">類別</h4>
         <h3 id="q-text" style="margin-top:5px;">問題標題</h3>
-        <p style="font-size:0.9em; margin-bottom:15px;">請依照<b>「重視程度」</b>依序點擊下方選項<br>(第 1 名最重要，依此類推)</p>
+        <p style="font-size:0.9em; margin-bottom:15px; color:#e74c3c;">
+            請依序點擊選項，標示出 1、2、3、4 名
+        </p>
         
-        <div class="rank-container">
-            <div class="rank-slot" id="slot-0" onclick="undoRank(0)"><span class="rank-label">NO.1</span><span class="content">點擊下方選項加入</span></div>
-            <div class="rank-slot" id="slot-1" onclick="undoRank(1)"><span class="rank-label">NO.2</span><span class="content"></span></div>
-            <div class="rank-slot" id="slot-2" onclick="undoRank(2)"><span class="rank-label">NO.3</span><span class="content"></span></div>
-            <div class="rank-slot" id="slot-3" onclick="undoRank(3)"><span class="rank-label">NO.4</span><span class="content"></span></div>
-        </div>
-
-        <div class="option-pool" id="q-options"></div>
+        <div class="option-pool" id="q-options">
+            </div>
 
         <button id="next-btn" class="nav-btn" onclick="nextQuestion()">下一題 ➔</button>
+        <p style="font-size:0.8em; margin-top:10px; color:#999; cursor:pointer;" onclick="resetCurrentRank()">↻ 點此重新排序本題</p>
     </div>
 
     <div id="step-result" class="step">
@@ -201,13 +207,7 @@
     // 🔴 你的 Google Script 網址
     const scriptURL = 'https://script.google.com/macros/s/AKfycbwNNc9BZ0AJzTGGYK4cnqAsuA78FtWMuuVoJMmn4hZpOSWuVCy0N6eLyPk-h414ZkJD/exec';
 
-    /* === 題庫擴充說明 ===
-       每題擴充為 4 個選項，對應：
-       - 失能/長照 (Long-term Care)
-       - 醫療/實支 (Medical/Surgery)
-       - 重大/一次金 (CI/Lump Sum)
-       - 壽險/意外 (Life/Accident)
-    */
+    /* === 題庫資料 (完整擴充版) === */
     
     // 【自我規劃】完整 10 題
     const questionsSelf = [
@@ -417,13 +417,13 @@
         }
     ];
 
-    // === 核心邏輯變數 ===
+    // === 核心邏輯 (Tap to Fill Rank) ===
     let currentMode = '';
     let currentQueue = [];
-    let answers = []; 
+    let answers = [];
     let currentIndex = 0;
     
-    // 排序暫存區
+    // 存目前這題的排序 [2, 0, 1] 表示選項2是第1名, 選項0是第2名...
     let currentRank = []; 
 
     function selectTarget(mode) {
@@ -457,67 +457,64 @@
 
         // 重置狀態
         currentRank = [];
-        updateRankUI();
         document.getElementById('next-btn').classList.remove('ready');
 
         const qData = currentQueue[currentIndex];
         document.getElementById('q-category').innerText = qData.cat;
         document.getElementById('q-text').innerText = (currentIndex+1) + ". " + qData.q;
         
-        // 進度條
         const pct = (currentIndex / currentQueue.length) * 100;
         document.getElementById('progress').style.width = pct + "%";
 
-        // 生成選項
+        renderOptions();
+    }
+
+    function renderOptions() {
+        const qData = currentQueue[currentIndex];
         const pool = document.getElementById('q-options');
         pool.innerHTML = '';
+
         qData.opts.forEach((opt, idx) => {
-            let btn = document.createElement('div');
-            btn.className = 'option-card';
-            btn.id = 'opt-' + idx;
-            btn.innerHTML = `<span class="badge">選項</span> ${opt.text}`;
-            btn.onclick = () => pickOption(idx);
-            pool.appendChild(btn);
+            let rankIndex = currentRank.indexOf(idx); // -1 表示沒選
+            let rankNum = rankIndex > -1 ? (rankIndex + 1) : "";
+            let isSelected = rankIndex > -1;
+
+            let card = document.createElement('div');
+            card.className = `option-card ${isSelected ? 'selected' : ''}`;
+            card.onclick = () => toggleOption(idx);
+
+            card.innerHTML = `
+                <div class="rank-box">${rankNum}</div>
+                <div class="option-text">${opt.text}</div>
+            `;
+            pool.appendChild(card);
         });
+
+        updateNextBtn();
     }
 
-    function pickOption(idx) {
-        if (currentRank.length >= 4) return;
-        currentRank.push(idx);
-        updateRankUI();
-    }
+    function toggleOption(idx) {
+        // 檢查是否已選
+        let rankIndex = currentRank.indexOf(idx);
 
-    function undoRank(slotIdx) {
-        if (slotIdx >= currentRank.length) return;
-        currentRank.splice(slotIdx, 1);
-        updateRankUI();
-    }
-
-    function updateRankUI() {
-        for (let i = 0; i < 4; i++) {
-            const slot = document.getElementById('slot-' + i);
-            const content = slot.querySelector('.content');
-            
-            if (i < currentRank.length) {
-                const optIdx = currentRank[i];
-                const qData = currentQueue[currentIndex];
-                content.innerText = qData.opts[optIdx].text;
-                slot.classList.add('filled');
-            } else {
-                content.innerText = (i === 0 && currentRank.length === 0) ? "點擊下方選項加入" : "";
-                slot.classList.remove('filled');
+        if (rankIndex > -1) {
+            // 已選：取消選擇 (從陣列移除)
+            currentRank.splice(rankIndex, 1);
+        } else {
+            // 未選：加入陣列 (如果還沒滿4個)
+            if (currentRank.length < 4) {
+                currentRank.push(idx);
             }
         }
+        renderOptions();
+    }
 
-        for (let i = 0; i < 4; i++) {
-            const btn = document.getElementById('opt-' + i);
-            if (currentRank.includes(i)) {
-                btn.classList.add('hidden');
-            } else {
-                btn.classList.remove('hidden');
-            }
-        }
+    function resetCurrentRank() {
+        currentRank = [];
+        renderOptions();
+    }
 
+    function updateNextBtn() {
         const nextBtn = document.getElementById('next-btn');
         if (currentRank.length === 4) {
             nextBtn.classList.add('ready');
